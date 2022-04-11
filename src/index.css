@@ -1,0 +1,65 @@
+body {
+  padding: 0 16px;
+  font-family: 'Roboto', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+
+  background-color: #a3681f;
+  background-image: url(../public/img/bg-wood-pattern.png); /* https://www.transparenttextures.com/wood-pattern.html */
+}
+
+.app-container {
+  width: 700px;
+  max-width: 100%;
+}
+
+.board{
+  background: url(../public/img/devices/board-akdev.png);
+  background-size:     cover;                      /* <------ */
+  background-repeat:   no-repeat;
+  background-position: center center;              /* optional, center the image */
+}
+
+.board *{
+  position: absolute;
+}
+
+.toolbar {
+  padding: 4px;
+  display: flex;
+  background-color: #ddd;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.toolbar > button {
+  margin-right: 4px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.code-editor {
+  width: 100%;
+  max-width: 100%;
+  height: 300px;
+  box-sizing: border-box;
+  border: 1px solid grey;
+}
+
+.compiler-output pre {
+  margin: 0;
+  white-space: pre-line;
+}
+
+#serial-output-text {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  max-height: 160px;
+  overflow: scroll;
+  border: 1px solid grey;
+  background-color: black;
+  color: white;
+}
