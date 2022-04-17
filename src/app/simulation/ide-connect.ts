@@ -1,5 +1,5 @@
 
-var url = "ws://localhost:8887";
+var url = "ws://localhost:8887/?from=web";
 
 export function connect(callback: Function) {
   
@@ -12,6 +12,8 @@ export function connect(callback: Function) {
         // Web Socket is connected, send data using send()
         //ws.send("Message to send");
         //alert("Message is sent...");
+
+        ws.send('{"from":"web", "message: "im alive"}'); // notify web connection.
       };
       
       ws.onmessage = function (evt) { 
@@ -26,6 +28,8 @@ export function connect(callback: Function) {
           let hexStr = Buffer.from(hex).toString();
 
           callback(hexStr);
+
+          ws.send('{"from":"web", "message: "received !"}');
             
         } else {
             console.log("[ide-connect] " + received_msg);
