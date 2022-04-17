@@ -9,7 +9,5 @@ export interface Component{
     /** Init Component, this is called before simulator start */
     init(arduino: ArduinoUno, runner: AVRRunner) : void;
 
-    update(arduino: ArduinoUno) : void;
-
     reset() : void;
 }

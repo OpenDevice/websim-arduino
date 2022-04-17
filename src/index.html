@@ -4,36 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>WEBSIM</title>
+    <title>WebSIM - AKDev Board</title>
     <link href="//fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div class="app-container">
-      <div class="board" style="width: 446px; height: 585px;">
-          <wokwi-led color="red" label="11" data-pin="11" style="top:173px; left:114px"></wokwi-led>
-          <wokwi-led color="yellow" label="12" data-pin="12" style="top:209px; left:114px"></wokwi-led>
-          <wokwi-led color="green" label="13" data-pin="13"  style="top:248px; left:114px"></wokwi-led>
+      
+      <aside id="resizable" class="sidebar-left movable-div position-fixed bottom-0 left-0 animated">
+          <div class="toolbar">
+            <button id="run-button">Connect</button>
+            <button id="stop-button" title="(ESC)"disabled>Stop</button>
+            <button id="load-saved" title="(F2)" >Restore Saved</button>
+            <div class="spacer"></div>
+            <div id="status-label">OKOKOK okoko</div>
+          </div>
+          <div class="compiler-output">  
+            <pre id="serial-output-text"></pre>
+          </div>
+      </aside>
+
+      <div id="board" class="content" style="width: 446px; height: 585px;">
+          <wokwi-led color="red" label="11" data-pin="11" style="top: 164px; left: 90px;"></wokwi-led>
+          <wokwi-led color="yellow" label="12" data-pin="12" style="top: 199px; left: 89px;"></wokwi-led>
+          <wokwi-led color="green" label="13" data-pin="13"  style="top: 233px; left: 89px;"></wokwi-led>
           
-          <!-- <wokwi-pushbutton color="yellow" label="top" style="top:355px; left:317px" ></wokwi-pushbutton> -->
-          <!-- <wokwi-pushbutton color="yellow" label="left" style="top:405px; left:263px"></wokwi-pushbutton> -->
-          <wokwi-pushbutton color="red" label="right" data-pin="3" data-inverted="true" style="top:405px; left:374px"></wokwi-pushbutton>
-          <wokwi-pushbutton color="red" label="down" data-pin="2" data-inverted="true" style="top: 457px; left:317px"></wokwi-pushbutton>
+          <wokwi-slide-potentiometer label="LDR (A1)" data-pin="1" max="100" style="top: 113px;left: 259px;transform: scale(0.4);" ></wokwi-slide-potentiometer> 
+          <wokwi-potentiometer label="POT (A0)" data-pin="0" max="100" style="top: 234px;left: 323px;" ></wokwi-potentiometer> 
+          
+          <wokwi-pushbutton color="yellow" aria-label="UP" label="5" data-pin="5" data-inverted="true" data-keyboard="ArrowUp" style="top:346px; left:294px" ></wokwi-pushbutton> 
+          <wokwi-pushbutton color="yellow" aria-label="LEFT" label="4"data-pin="4" data-inverted="true" data-keyboard="ArrowLeft" style="top:398px; left:241px"></wokwi-pushbutton>
+          <wokwi-pushbutton color="red" aria-label="RIGHT" label="3" data-pin="3" data-inverted="true" data-keyboard="ArrowRight" style="top: 398px; left: 352px;"></wokwi-pushbutton>
+          <wokwi-pushbutton color="red"aria-label="DOWN" label="2" data-pin="2" data-inverted="true" data-keyboard="ArrowDown" style="top: 448px; left: 294px;"></wokwi-pushbutton>
 
 
-          <wokwi-ssd1306 label="ssd13" style="top:177px; left:164px"></wokwi-ssd1306>
+          <wokwi-ssd1306 label="ssd13" style="top: 164px; left: 140px;"></wokwi-ssd1306>
       </div>
-      <div class="toolbar">
-        <button id="run-button">Connect</button>
-        <button id="stop-button" disabled>Stop</button>
-        <button id="load-saved" >Restore Saved</button>
-        <div class="spacer"></div>
-        <div id="status-label"></div>
-      </div>
-      <pre id="compiler-output-text"></pre>
-      <div class="compiler-output">  
-        <pre id="serial-output-text"></pre>
-      </div>
+
     </div>
-    <script src="./app/index.ts"></script>
+    <script type="module" src="./app/index.ts"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.4.1.slim.js"></script> -->
+    <!-- <script src="./app/ui/sidebar.js"></script> -->
   </body>
 </html>

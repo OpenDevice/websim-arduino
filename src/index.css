@@ -1,65 +1,152 @@
 body {
-  padding: 0 16px;
   font-family: 'Roboto', sans-serif;
-  width: 100%;
   box-sizing: border-box;
-
   background-color: #a3681f;
+  margin: 0;
   background-image: url(../public/img/bg-wood-pattern.png); /* https://www.transparenttextures.com/wood-pattern.html */
 }
 
 .app-container {
-  width: 700px;
+  min-height: 100vh;
   max-width: 100%;
+  width: 100%;
+  height: 100%;
+  table-layout: fixed;
+  overflow: hidden;
+  padding-top: 0;
 }
 
-.board{
+#board{
   background: url(../public/img/devices/board-akdev.png);
   background-size:     cover;                      /* <------ */
   background-repeat:   no-repeat;
   background-position: center center;              /* optional, center the image */
+  margin: 8px;
+  position: relative;
+  float: left;
+
+  /* disable selection */
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
 
-.board *{
+#board > *{
   position: absolute;
 }
 
 .toolbar {
   padding: 4px;
   display: flex;
-  background-color: #ddd;
+  background-color: #006468;
   box-sizing: border-box;
   width: 100%;
 }
 
 .toolbar > button {
   margin-right: 4px;
+  background-color: #45939b;
+  border: 1px solid #5be8ed;
+  color: #d8f7ff;
+  border-radius: 4px;
 }
 
-.spacer {
-  flex: 1;
+.toolbar > button:disabled {
+  background-color: #1f686a;
+  border: 1px solid #6e9395;
+  color: #8bbcc9;
 }
 
-.code-editor {
-  width: 100%;
-  max-width: 100%;
-  height: 300px;
-  box-sizing: border-box;
-  border: 1px solid grey;
+.toolbar #status-label {
+  color: #8bbcc9;
+}
+
+.compiler-output {
+  height: 100vh;
+  background-color: red;
 }
 
 .compiler-output pre {
   margin: 0;
   white-space: pre-line;
-}
-
-#serial-output-text {
+  height: 100vh;
   width: 100%;
   box-sizing: border-box;
   padding: 8px 12px;
-  max-height: 160px;
   overflow: scroll;
   border: 1px solid grey;
-  background-color: black;
+  background-color: rgb(24, 24, 24);
   color: white;
+}
+
+
+/****************** left sidebar **************** */
+
+aside.sidebar-left {
+  height: 100vh;
+  min-width: 320px;
+  background-color: #ddd;
+  width: 175px;
+  top: 0;
+  float: left;
+  box-shadow: -5px 0 0 #f7f7f7 inset;
+  z-index: 1000;
+}
+
+@media (min-width: 768px) {
+  .app-container aside.sidebar-left {
+    top: 0;
+  }
+}
+
+
+aside.sidebar-left .draghandle {
+  position: absolute;
+  z-index: 100;
+  width: 8px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  cursor: col-resize;
+  float: right;
+  background-color: red;
+}
+
+
+
+.app-container #board.content {
+  /* margin-left: 330px; */
+}
+
+@media (max-width: 768px) {
+  aside.sidebar-left {
+    display: none;
+  }
+}
+
+
+
+
+/****************** scrollbar **************** */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #2c2c2c;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
 }

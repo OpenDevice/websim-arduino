@@ -1,5 +1,5 @@
 import '@wokwi/elements';
-import { LEDElement, SSD1306Element, PushbuttonElement } from '@wokwi/elements';
+import { LEDElement, SSD1306Element, PushbuttonElement, PotentiometerElement, SlidePotentiometerElement } from '@wokwi/elements';
 import { PinState } from 'avr8js';
 import { connect } from './simulation/ide-connect';
 import { CPUPerformance } from './simulation/cpu-performance';
@@ -10,6 +10,7 @@ import { AVRRunner } from '../devices/arduino/ATmega328Runner';
 
 import { SSD1306Controller } from '../devices/display/ssd1306';
 import { DigitalPinComponent, PinDir } from '../devices/DigitalPinComponent';
+import { AnalogInputComponent } from '../devices/AnalogInputComponent';
 
 import '../index.css';
 
@@ -18,7 +19,7 @@ import '../index.css';
 //const led12 = document.querySelector<LEDElement>('wokwi-led[color=red]');
 //const display = document.querySelector<SSD1306Element>('wokwi-ssd1306');
 
-const boardElements = document.querySelectorAll<HTMLElement>('.board > *');
+const boardElements = document.querySelectorAll<HTMLElement>('#board > *');
 
 // Set up toolbar
 let arduino = new ArduinoUno();
@@ -34,7 +35,6 @@ loadSavedButton.addEventListener('click', loadSavedProgram);
 
 
 const statusLabel = document.querySelector('#status-label');
-const compilerOutputText = document.querySelector('#compiler-output-text');
 const serialOutputText = document.getElementById('serial-output-text');
 
 const cpuPerf = new CPUPerformance(arduino.MHZ);
@@ -52,6 +52,32 @@ arduino.serialOutputCallback  = ((text) => {
 });
 
 
+
+// //Disable default IE help popup
+// window.onhelp = function() {
+//   return false;
+// };
+
+// TODO: move to another location...
+document.addEventListener("keydown", function(evt) {
+    switch (evt.keyCode) {
+      //ESC
+      case 27:
+          stopCode();
+          return true;   
+      //F2
+      case 113:
+        loadSavedProgram();
+        return true;   
+      //Fallback to default browser behaviour
+      default:
+          return true;
+  }
+  //Returning false overrides default browser event
+  return false;    
+});
+
+
 /**
  * Init drivers for componentes added to div.board 
  */
@@ -64,19 +90,29 @@ function initComponents(){
     }
 
     if(ui instanceof LEDElement){
-      arduino.addComponent(new DigitalPinComponent(ui.dataset.pin, PinDir.OUTPUT,  ui));
+      arduino.addComponent(new DigitalPinComponent(+ui.dataset.pin, PinDir.OUTPUT,  ui));
     }
 
     if(ui instanceof PushbuttonElement){
-      arduino.addComponent(new DigitalPinComponent(ui.dataset.pin, PinDir.INPUT,  ui));
+      arduino.addComponent(new DigitalPinComponent(+ui.dataset.pin, PinDir.INPUT,  ui));
+    }
+
+    if(ui instanceof PotentiometerElement){
+      arduino.addComponent(new AnalogInputComponent(+ui.dataset.pin,  ui));
+    } 
+
+    if(ui instanceof SlidePotentiometerElement){
+      arduino.addComponent(new AnalogInputComponent(+ui.dataset.pin,  ui));
     }
 
   });
 
 }
 
-
 function beforeExecute(runner: AVRRunner){
+
+  window.runner = runner;
+  window.arduino = arduino;
 
   // runner.portD.addListener((value: number, oldValue: number)=>{
   //   console.log("## port changed %d > %d !!", oldValue, value);
@@ -115,7 +151,6 @@ function executeProgram(hex: string) {
 //  });
 
 
-  compilerOutputText.textContent += '\nProgram running...';
   stopButton.removeAttribute('disabled');
 }
 
@@ -132,9 +167,12 @@ async function connectToIde() {
   //led12.value = false;
   //led13.value = false;
 
+
+
   runButton.setAttribute('disabled', '1');
 
   serialOutputText.textContent = '';
+
   try {
     statusLabel.textContent = 'Compiling...';
 
@@ -142,8 +180,7 @@ async function connectToIde() {
 
       executeProgram(hex);
       
-      // save last program
-      saveProgram(hex);
+      saveProgram(hex); // save last program
 
     });
 

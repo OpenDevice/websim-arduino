@@ -14,7 +14,10 @@ import {
   spiConfig,
   twiConfig,
   AVRSPI,
-  AVRTWI
+  AVRTWI,
+  AVRADC,
+  adcConfig
+
 } from 'avr8js';
 import { I2CBus } from './internal/i2c-bus';
 
@@ -44,7 +47,8 @@ export class AVRRunner {
   readonly spi: AVRSPI;
   readonly twi: AVRTWI;
   readonly i2cBus: I2CBus  | null = null;
-  readonly speed = 16e6; // 16 MHZ
+  readonly adc: AVRADC;
+  readonly MHZ = 16e6; // 16 MHZ
   readonly workUnitCycles = 500000;
   readonly taskScheduler = new MicroTaskScheduler();
 
@@ -68,15 +72,17 @@ export class AVRRunner {
     this.portC = new AVRIOPort(this.cpu, portCConfig);
     this.portD = new AVRIOPort(this.cpu, portDConfig);
 
-    this.usart = new AVRUSART(this.cpu, usart0Config, this.speed);
-    this.spi = new AVRSPI(this.cpu, spiConfig, this.speed);
-    this.twi = new AVRTWI(this.cpu, twiConfig, this.speed);
+    this.usart = new AVRUSART(this.cpu, usart0Config, this.MHZ);
+    this.spi = new AVRSPI(this.cpu, spiConfig, this.MHZ);
+    this.twi = new AVRTWI(this.cpu, twiConfig, this.MHZ);
     this.i2cBus = new I2CBus(this.twi);
+    this.adc = new AVRADC(this.cpu, adcConfig);
 
     this.taskScheduler.start();
 
     // FROM: https://stackblitz.com/edit/avr8js-simon-game-j4rxnx?file=execute.ts
     // Simulate analog port (so that analogRead() eventually return)
+    /*
     this.cpu.writeHooks[0x7a] = value => {
       if (value & (1 << 6)) {
         this.cpu.data[0x7a] = value & ~(1 << 6); // clear bit - conversion done
@@ -87,7 +93,7 @@ export class AVRRunner {
         return true; // don't update
       }
     };
-
+    */
   }
 
   private cpuTimeMS = 0;
@@ -110,14 +116,14 @@ export class AVRRunner {
       // TODO this probably can be done more efficiently?
 
       if(this.cpuEvents.length > 0 
-         && Math.floor(this.cpu.cycles*1000/this.speed) !== this.cpuTimeMS)
+         && Math.floor(this.cpu.cycles*1000/this.MHZ) !== this.cpuTimeMS)
       {
-          this.cpuTimeMS = Math.floor(this.cpu.cycles*1000/this.speed);
+          this.cpuTimeMS = Math.floor(this.cpu.cycles*1000/this.MHZ);
 
           for(const event of this.cpuEvents)
           {
 
-              if(Math.floor(this.cpu.cycles*1000/this.speed) % event.period === 0) //events by ms
+              if(Math.floor(this.cpu.cycles*1000/this.MHZ) % event.period === 0) //events by ms
               {
                   event.eventCall(this.cpu.cycles);
 
@@ -126,15 +132,15 @@ export class AVRRunner {
       }
 
       if(this.cpuEventsMicrosecond.length > 0 
-         && Math.floor(this.cpu.cycles*1000000/this.speed) !== this.cpuTimeMicroS)
+         && Math.floor(this.cpu.cycles*1000000/this.MHZ) !== this.cpuTimeMicroS)
       {
-          this.cpuTimeMicroS = Math.floor(this.cpu.cycles*1000000/this.speed);
+          this.cpuTimeMicroS = Math.floor(this.cpu.cycles*1000000/this.MHZ);
 
 
           for(const event of this.cpuEventsMicrosecond)
           {
 
-              if(Math.floor(this.cpu.cycles*1000000/this.speed) % event.period === 0)
+              if(Math.floor(this.cpu.cycles*1000000/this.MHZ) % event.period === 0)
               {
 
                   event.eventCall(this.cpu.cycles);

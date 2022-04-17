@@ -32,11 +32,11 @@ export class ArduinoUno {
   }
 
   cpuNanos():number {
-    return Math.round((this.runner.cpu.cycles / this.runner.speed) * 1000000000);
+    return Math.round((this.runner.cpu.cycles / this.runner.MHZ) * 1000000000);
   }
 
   cpuMillis():number {
-    return Math.round((this.runner.cpu.cycles / this.runner.speed) * 1000);
+    return Math.round((this.runner.cpu.cycles / this.runner.MHZ) * 1000);
   }
 
   addComponent(comp:Component){
@@ -151,5 +151,15 @@ export class ArduinoUno {
 
     return false;
   }
+
+  analogWrite(pin:number, analogValue: number){
+      // Write analogValue to ADCH and ADCL
+      //this.runner.cpu.data[0x78] = analogValue & 0xff;
+      //this.runner.cpu.data[0x79] = (analogValue >> 8) & 0x3;
+
+      this.runner.adc.channelValues[pin] = analogValue;
+      //this.runner.adc.channelValues[2] = analogValue;
+      //this.runner.adc.completeADCRead(analogValue);
+   }
 }
 
