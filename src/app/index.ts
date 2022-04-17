@@ -176,9 +176,13 @@ async function connectToIde() {
   try {
     statusLabel.textContent = 'Compiling...';
 
-    connect(function(hex:string){
+    connect(function(hex:string){ // on upload ...
 
       executeProgram(hex);
+
+      if (!document.hidden) {
+        alert("Upload ok !"); // force focus on window...
+      }
       
       saveProgram(hex); // save last program
 
