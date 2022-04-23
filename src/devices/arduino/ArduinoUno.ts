@@ -16,6 +16,8 @@ export class ArduinoUno {
   
   public serialOutputCallback: callback | null = null;
   public simulationTimeCallback: simulationCallback | null = null;
+  public breakEventCallback: (cpu: CPU) => void;
+
   public MHZ = 16000000;
 
 
@@ -70,6 +72,8 @@ export class ArduinoUno {
  
     this.runner = new AVRRunner(hex); 
 
+    if(this.breakEventCallback) this.runner.breakEventCallback = this.breakEventCallback;
+
     for (const event of this.cpuEventsMicrosecond)
       this.runner._addCPUEventMicrosecond(event);
 
@@ -102,9 +106,22 @@ export class ArduinoUno {
     return this.runner.i2cBus;
   }
 
-  stopExecute() {
+  stop() {
     this.runner?.stop();
     this.runner = null;
+  }
+
+  pause() {
+    this.runner?.pause();
+  }
+
+  resume() {
+    this.runner?.resume();
+  }
+
+  isRunning(){
+    if(!this.runner) return false;
+    return this.runner.isRunning();
   }
 
   digitalPinToPort(pin: number): AVRIOPort {
@@ -160,6 +177,10 @@ export class ArduinoUno {
       this.runner.adc.channelValues[pin] = analogValue;
       //this.runner.adc.channelValues[2] = analogValue;
       //this.runner.adc.completeADCRead(analogValue);
+   }
+
+   setBreakpoints(breakpoints:string[]){
+      this.runner.setBreakpoints(breakpoints);
    }
 }
 

@@ -1,6 +1,6 @@
 import '@wokwi/elements';
 import { LEDElement, SSD1306Element, PushbuttonElement, PotentiometerElement, SlidePotentiometerElement } from '@wokwi/elements';
-import { PinState } from 'avr8js';
+import { CPU, PinState } from 'avr8js';
 import { connect } from './simulation/ide-connect';
 import { CPUPerformance } from './simulation/cpu-performance';
 import { formatTime } from './simulation/format-time';
@@ -14,24 +14,36 @@ import { AnalogInputComponent } from '../devices/AnalogInputComponent';
 
 import '../index.css';
 
-// 
-//const led13 = document.querySelector<LEDElement>('wokwi-led[color=green]');
-//const led12 = document.querySelector<LEDElement>('wokwi-led[color=red]');
-//const display = document.querySelector<SSD1306Element>('wokwi-ssd1306');
+
 
 const boardElements = document.querySelectorAll<HTMLElement>('#board > *');
 
 // Set up toolbar
 let arduino = new ArduinoUno();
 
+let breakpointsSources:string[] = [];
+let breakpoints:string[] = [];
+
+// TODO: mover para camada de actions...
+
 /* eslint-disable @typescript-eslint/no-use-before-define */
-const runButton = document.querySelector('#run-button');
-runButton.addEventListener('click', connectToIde);
-const stopButton = document.querySelector('#stop-button');
+const btnConnect = document.querySelector('#btn-connect');
+btnConnect.addEventListener('click', connectToIde);
+
+const stopButton = document.querySelector('#btn-stop');
 stopButton.addEventListener('click', stopCode);
+
+const pauseButton = document.querySelector('#btn-pause');
+pauseButton.addEventListener('click', pauseResume);
 
 const loadSavedButton = document.querySelector('#load-saved');
 loadSavedButton.addEventListener('click', loadSavedProgram);
+
+document.getElementById("btn-help").addEventListener('click', function(){
+  window.open("https://github.com/OpenDevice/websim-arduino-docs/wiki");
+});
+
+
 
 
 const statusLabel = document.querySelector('#status-label');
@@ -39,11 +51,37 @@ const serialOutputText = document.getElementById('serial-output-text');
 
 const cpuPerf = new CPUPerformance(arduino.MHZ);
 
+arduino.breakEventCallback = (cpu:CPU) => {
+ 
+  arduino.pause();
+  updateRunningState();
+
+  let pcAddr = cpu.pc * 2;
+
+  let addr = "0x"+pcAddr.toString(16);
+
+  let srcIndex = breakpoints.indexOf(addr);
+
+  for (let index = 0; index < breakpointsSources.length; index++) {
+    const line = breakpointsSources[index];
+    if(index == srcIndex){
+      console.error(line);
+    }else{
+      console.warn(line);
+    }
+    
+  }
+ //alert("Sopted");
+ //debugger;  
+};
+
 arduino.simulationTimeCallback = ((cpu) => {
   const time = formatTime(cpu.cycles / arduino.MHZ);
   const speed = (cpuPerf.update(cpu) * 100).toFixed(0);
   // const cycles = cpu.SP; //  [c:${cycles}]
-  statusLabel.textContent = `Simulation time: ${time} (${speed}%)`;
+  statusLabel.textContent = `T: ${time} - CPU: ${speed}%`;
+
+
 });
 
 arduino.serialOutputCallback  = ((text) => {
@@ -114,6 +152,38 @@ function beforeExecute(runner: AVRRunner){
   window.runner = runner;
   window.arduino = arduino;
 
+  // runner.setBreakpoints(["0x356","0x356","0x35e","0x36a","0x372","0x37e","0x380","0x380","0x388"]);
+  
+
+  /*
+  breakpoints = [
+      "0x356",
+      "0x356",
+      "0x35e",
+      "0x36a",
+      "0x372",
+      "0x37e",
+      "0x380",
+      "0x380",
+      "0x388"
+  ];
+
+  runner.setBreakpoints(breakpoints);
+
+  breakpointsSources = [
+    "void loop() {",
+    "  digitalWrite(LED_BUILTIN, HIGH);   ",
+    "  delay(500);                      ",
+    "  digitalWrite(LED_BUILTIN, LOW);    ",
+    "  delay(500);                      ",
+    "}",
+    "void setup() {",
+    "  pinMode(LED_BUILTIN, OUTPUT);",
+    "}"
+ ];
+
+ */
+
   // runner.portD.addListener((value: number, oldValue: number)=>{
   //   console.log("## port changed %d > %d !!", oldValue, value);
   //   for (let pin = 0; pin < 8; pin++) {
@@ -143,6 +213,8 @@ function executeProgram(hex: string) {
   serialOutputText.textContent = "";
 
   let runner:AVRRunner = arduino.executeProgram(hex, beforeExecute);
+
+  
  
   // Hook to PORTB register
 //  runner.portB.addListener(() => {
@@ -152,6 +224,7 @@ function executeProgram(hex: string) {
 
 
   stopButton.removeAttribute('disabled');
+  pauseButton.removeAttribute('disabled');
 }
 
 async function saveProgram(hex: string){
@@ -164,17 +237,10 @@ function loadSavedProgram(){
 }
 
 async function connectToIde() {
-  //led12.value = false;
-  //led13.value = false;
-
-
-
-  runButton.setAttribute('disabled', '1');
 
   serialOutputText.textContent = '';
 
   try {
-    statusLabel.textContent = 'Compiling...';
 
     connect(function(hex:string){ // on upload ...
 
@@ -186,21 +252,69 @@ async function connectToIde() {
       
       saveProgram(hex); // save last program
 
+    }, /** onMessage */ (msg:any) =>{
+
+      onMessageReceived(msg);
+
     });
 
   } catch (err) {
-    runButton.removeAttribute('disabled');
+    btnConnect.removeAttribute('disabled');
     alert('Failed: ' + err);
   } finally {
-    statusLabel.textContent = '';
+    // statusLabel.textContent = '';
   }
 }
 
-function stopCode() {
-  stopButton.setAttribute('disabled', '1');
-  runButton.removeAttribute('disabled');
-  arduino.stopExecute();
+
+function onMessageReceived(msg:any){
+
+  btnConnect.setAttribute('disabled', '1');
+  btnConnect.firstElementChild.classList.remove('fa-link-slash'); // set as connected
+  // btnConnect.firstElementChild.classList.add('fa-link-slash'); // set as connected
+
+  if(msg["breakpoints"]){
+    arduino.setBreakpoints(msg["breakpoints"]);
+    breakpoints = msg["breakpoints"];
+    breakpointsSources = msg["sources"];
+
+    console.log("breakpoints", msg["breakpoints"]);
+    console.log("sources", msg["sources"]);
+  }
+
 }
+
+
+function updateRunningState(){
+  let icon = pauseButton.firstElementChild;
+  if(arduino.isRunning()){
+    icon.classList.remove("fa-circle-play");
+    icon.classList.add("fa-circle-pause");
+  }else{
+    icon.classList.remove("fa-circle-pause");
+    icon.classList.add("fa-circle-play");  
+  }
+}
+
+function pauseResume(){
+
+  let icon = pauseButton.firstElementChild;
+  if(arduino.isRunning()){
+    arduino.pause();
+    updateRunningState();
+  }else{
+    arduino.resume();
+    updateRunningState();
+  }
+
+}
+
+function stopCode() {
+  arduino.stop(); // TODO reset !
+  stopButton.setAttribute('disabled', '1');
+}
+
+
 
 initComponents();
 

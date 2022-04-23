@@ -32,6 +32,8 @@ export type CPUEvent = {
 // ATmega328p params
 const FLASH = 0x8000;
 
+const BREAK_OPCODE = 0x9598;
+
 // Datasheet: https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf
 // Overview: https://www.theengineeringprojects.com/2017/08/introduction-to-atmega328.html
 export class AVRRunner {
@@ -51,11 +53,14 @@ export class AVRRunner {
   readonly MHZ = 16e6; // 16 MHZ
   readonly workUnitCycles = 500000;
   readonly taskScheduler = new MicroTaskScheduler();
+  public breakEventCallback: Function | null = null;
+  private breakpoints:number[]
 
 
   //events
   private cpuEvents : CPUEvent[] = [];
   private cpuEventsMicrosecond : CPUEvent[] = [];
+  private callback: (cpu: CPU) => void;
 
 
   constructor(hex: string) {
@@ -100,6 +105,7 @@ export class AVRRunner {
   private cpuTimeMicroS = 0;
 
   private isStopped = false;
+  private isResumed = false;
 
   // CPU main loop
   execute(callback: (cpu: CPU) => void) {
@@ -110,7 +116,31 @@ export class AVRRunner {
     const cyclesToRun = this.cpu.cycles + this.workUnitCycles;
 
     while (this.cpu.cycles < cyclesToRun) {
+
+      if (this.cpu.progMem[this.cpu.pc] === BREAK_OPCODE) {
+        
+        this.onBreakInstruction();
+
+      }
+
+      // Handle breakpoints if is set.
+      if(this.breakpoints){
+        if(!this.isResumed){
+          for (let index = 0; index < this.breakpoints.length; index++) {
+            const bkp = this.breakpoints[index];
+            let pcAddr = this.cpu.pc * 2;
+            if(pcAddr == bkp){
+              this.onBreakInstruction();
+              return;
+            }
+          }
+        }else{
+          this.isResumed = false; // reset resumed flag;
+        }
+      }
+
       avrInstruction(this.cpu);
+
       this.cpu.tick();
 
       // TODO this probably can be done more efficiently?
@@ -158,16 +188,66 @@ export class AVRRunner {
 
   start(callback: (cpu: CPU) => void){
       this.isStopped = false;
-
-      console.log("[runner] this.cpuEventsMicrosecond:", this.cpuEventsMicrosecond.length);
-      console.log("[runner] this.cpuEvents:", this.cpuEvents.length);
+      this.callback = callback;
 
       this.execute(callback);
   }
 
   stop() {
-    this.taskScheduler.stop();
     this.isStopped = true;
+    this.taskScheduler.stop();
+  }
+  
+  pause() {
+    this.isStopped = true;
+    this.taskScheduler.stop();
+  }
+
+  resume() {
+    this.isResumed = true;
+    this.taskScheduler.start();
+    this.start(this.callback);
+  }
+
+  isRunning() {
+    return !this.isStopped;
+  }
+
+  setBreakpoints(breakpoints:string[]){
+
+    let list:number[] = [];
+    for (let index = 0; index < breakpoints.length; index++) {
+      const value = breakpoints[index];
+      list.push(Number(value));
+    }
+
+    this.breakpoints = list;
+  }
+
+
+  onBreakInstruction(){
+ 
+    // this.isStopped = true;
+    // this.cpu.progMem[this.cpu.pc]
+
+    // PC doesn't include the LSB, so you should multiply it by 2.
+    let elfAddr = (this.cpu.pc * 2).toString(16);
+
+    console.groupCollapsed('MCU Registers (PC: 0x%s, ELF: %s)', this.cpu.pc.toString(16), elfAddr);
+
+    console.groupCollapsed("Registers");
+    console.table({
+        C1:   {value: "x"},
+        C2: {value: "x"},
+        C3: {value: "x"}
+    }); 
+    console.groupEnd();
+    
+    console.groupEnd();
+    // debugger;
+
+    if(this.breakEventCallback) this.breakEventCallback(this.cpu);
+
   }
 
   /**
