@@ -7,11 +7,15 @@ export function connect(newFirmwareCallback: Function, onMessage: Function) {
         
       var ws = new WebSocket(url);
       ws.binaryType = "arraybuffer";
+
+      let hasConnected = false;
       
       ws.onopen = function() {
         // Web Socket is connected, send data using send()
         //ws.send("Message to send");
         //alert("Message is sent...");
+
+        hasConnected = true;
 
         ws.send('{"from":"web", "message": "im alive"}'); // notify web connection.
       };
@@ -45,10 +49,13 @@ export function connect(newFirmwareCallback: Function, onMessage: Function) {
         
       };
       
-      ws.onclose = function() { 
-        
-        // websocket is closed.
-        alert("Connection is closed..."); 
+      ws.onclose = function(e) { 
+
+        if(hasConnected)
+          alert("Connection lost"); 
+        else
+          alert("Local server is not running !"); 
+
       };
   } else {
     

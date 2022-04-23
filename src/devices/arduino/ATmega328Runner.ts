@@ -53,9 +53,10 @@ export class AVRRunner {
   readonly MHZ = 16e6; // 16 MHZ
   readonly workUnitCycles = 500000;
   readonly taskScheduler = new MicroTaskScheduler();
-  public breakEventCallback: Function | null = null;
   private breakpoints:number[]
 
+  /** Fired when hit breakpoint or asm("break;") */
+  public breakEventCallback: Function | null = null;
 
   //events
   private cpuEvents : CPUEvent[] = [];
