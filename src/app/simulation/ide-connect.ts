@@ -1,7 +1,7 @@
 
 var url = "ws://localhost:8887/?from=web";
 
-export function connect(callback: Function) {
+export function connect(newFirmwareCallback: Function, onMessage: Function) {
   
     if ("WebSocket" in window) {
         
@@ -13,7 +13,7 @@ export function connect(callback: Function) {
         //ws.send("Message to send");
         //alert("Message is sent...");
 
-        ws.send('{"from":"web", "message: "im alive"}'); // notify web connection.
+        ws.send('{"from":"web", "message": "im alive"}'); // notify web connection.
       };
       
       ws.onmessage = function (evt) { 
@@ -27,12 +27,19 @@ export function connect(callback: Function) {
 
           let hexStr = Buffer.from(hex).toString();
 
-          callback(hexStr);
+          newFirmwareCallback(hexStr);
 
-          ws.send('{"from":"web", "message: "received !"}');
+          ws.send('{"from":"web", "message": "received !"}');
             
         } else {
-            console.log("[ide-connect] " + received_msg);
+            
+          console.log("[ide-connect] " + received_msg);
+
+          if(received_msg[0] == '{'){
+            let json = JSON.parse(received_msg);
+            onMessage(json);
+          }
+
         }
 
         
