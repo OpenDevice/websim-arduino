@@ -48,11 +48,13 @@ body {
 }
 
 .toolbar > button {
+  font-size: 15px;
   margin-right: 4px;
   background-color: #45939b;
   border: 1px solid #5be8ed;
   color: #d8f7ff;
-  border-radius: 4px;
+  border-radius: 4px; 
+  cursor: pointer;
 }
 
 .toolbar > button:disabled {
@@ -61,19 +63,22 @@ body {
   color: #8bbcc9;
 }
 
-.toolbar #status-label {
-  color: #8bbcc9;
+#status-label {
+  font-size: 14px;
+  color: #b9b5b5;
+  width: 172px; 
+  text-align: center;
 }
 
 .compiler-output {
-  height: 100vh;
+  /* height: 100vh; */
   background-color: red;
 }
 
 .compiler-output pre {
   margin: 0;
   white-space: pre-line;
-  height: 100vh;
+  height: 100vh; 
   width: 100%;
   box-sizing: border-box;
   padding: 8px 12px;
@@ -87,7 +92,7 @@ body {
 /****************** left sidebar **************** */
 
 aside.sidebar-left {
-  height: 100vh;
+  height: calc(100vh - (100px)); 
   min-width: 320px;
   background-color: #ddd;
   width: 175px;

@@ -6,24 +6,34 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>WebSIM - AKDev Board</title>
     <link href="//fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
+    <link href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet" />
   </head>
   <body>
+
+
+
     <div class="app-container">
       
       <aside id="resizable" class="sidebar-left movable-div position-fixed bottom-0 left-0 animated">
-          <div class="toolbar">
-            <button id="run-button">Connect</button>
-            <button id="stop-button" title="(ESC)"disabled>Stop</button>
-            <button id="load-saved" title="(F2)" >Restore Saved</button>
-            <div class="spacer"></div>
-            <div id="status-label"></div>
-          </div>
+        
+        <div class="toolbar">
+          <button id="btn-connect"><i class="fa-solid fa-link fa-link-slash"></i> IDE</button>
+          <button id="btn-stop" title="(ESC)" disabled> <i class="fa-regular fa-circle-stop"></i> </button>
+          <button id="btn-pause" title="(F9)" disabled> <i class="fa-regular fa-circle-pause"></i> </button>
+          <button id="load-saved" title="(F2) Restore last Program" ><i class="fa-solid fa-retweet"></i> Restore</button>
+          
+          <button id="btn-help" title="(F1)" > <i class="fa-solid fa-circle-question"></i> Help</button>
+        </div>
+
           <div class="compiler-output">  
             <pre id="serial-output-text"></pre>
           </div>
       </aside>
 
       <div id="board" class="content" style="width: 446px; height: 585px;">
+
+          <div id="status-label" style="top: 106px; left: 128px;">...</div>
+
           <wokwi-led color="red" label="11" data-pin="11" style="top: 164px; left: 90px;"></wokwi-led>
           <wokwi-led color="yellow" label="12" data-pin="12" style="top: 199px; left: 89px;"></wokwi-led>
           <wokwi-led color="green" label="13" data-pin="13"  style="top: 233px; left: 89px;"></wokwi-led>

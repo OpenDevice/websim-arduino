@@ -82,6 +82,7 @@
     "npm": ">= 5.0.0"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.1.1",
     "avr8js": ">= 0.18.10"
   },
   "browserslist": [
