@@ -162,14 +162,14 @@ export class SimulationController{
         btnConnect.firstElementChild.classList.remove('fa-link-slash'); // set as connected
         // btnConnect.firstElementChild.classList.add('fa-link-slash'); // set as connected
       
-        if(msg["breakpoints"]){
-          arduino.setBreakpoints(msg["breakpoints"]);
-          this.breakpoints = msg["breakpoints"];
-          this.breakpointsSources = msg["sources"];
+        // if(msg["breakpoints"]){
+        //   arduino.setBreakpoints(msg["breakpoints"]);
+        //   this.breakpoints = msg["breakpoints"];
+        //   this.breakpointsSources = msg["sources"];
       
-          console.log("breakpoints", msg["breakpoints"]);
-          console.log("sources", msg["sources"]);
-        }
+        //   console.log("breakpoints", msg["breakpoints"]);
+        //   console.log("sources", msg["sources"]);
+        // }
       
       }
       

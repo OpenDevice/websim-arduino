@@ -1,4 +1,4 @@
-import { ArduinoUno } from "./arduino/ArduinoUno";
+import { ArduinoUno, map } from "./arduino/ArduinoUno";
 import { AVRRunner } from "./arduino/ATmega328Runner";
 import { Component } from "./Component";
 import { PinState } from 'avr8js';
@@ -12,7 +12,7 @@ export class AnalogInputComponent implements Component {
   constructor(private pin: number,  private ui: HTMLElement){
 
     this.ui.addEventListener('input', () => {
-        let value = this.map(ui.value, 0, 100, 0, 5);
+        let value = map(ui.value, 0, 100, 0, 5);
         console.log(TAG +  "set %d = ", pin, value);
         this.analogWrite(pin, value);
     });
@@ -33,10 +33,7 @@ export class AnalogInputComponent implements Component {
     // throw new Error("Method not implemented.");
   }
 
-  map(x:number, in_min:number, in_max:number, out_min:number, out_max:number) : number {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-  }
-
+ 
   
 
 

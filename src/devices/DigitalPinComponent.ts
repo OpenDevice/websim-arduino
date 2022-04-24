@@ -85,12 +85,16 @@ export class DigitalPinComponent implements Component {
 
         // TODO: create digitalRead on arduinoUno class ....
 
-        let portX = arduino.digitalPinToPort(this.pin);
-        let bitMask = arduino.digitalPinToBitMask(this.pin);
-
-        portX.addListener(() => {
-          led.value = portX.pinState(bitMask) === PinState.High;
+        arduino.onPinChange(this.pin, (value) => {
+          led.value = value;
         });
+
+        // let portX = arduino.digitalPinToPort(this.pin);
+        // let bitMask = arduino.digitalPinToBitMask(this.pin);
+
+        // portX.addListener(() => {
+        //   led.value = portX.pinState(bitMask) === PinState.High;
+        // });
 
       }
 
