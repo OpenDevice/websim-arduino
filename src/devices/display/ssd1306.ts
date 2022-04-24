@@ -146,6 +146,8 @@ export class SSD1306Controller implements I2CDevice, Component {
   private currentCommandLength = 0;
   private currentCommand = new Uint8Array(8);
 
+  private lazyInit = false;
+
   constructor(private ui : SSD1306Element) {
     this.reset();
   }
@@ -157,12 +159,6 @@ export class SSD1306Controller implements I2CDevice, Component {
     this.reset();
     
     runner.i2cBus.registerDevice(SSD1306_ADDR_OTHER, this);
-
-    // update every 50ms
-    // TODO: only call this, if receive message from i2cBus to avoid CPU usage.
-    runner.requestUpdate(50, () => {
-      this.update(arduino);
-    });
     
   }
 
@@ -221,10 +217,21 @@ export class SSD1306Controller implements I2CDevice, Component {
     this.pageEnd = 7;
     this.startLine = 0;
     this.invert = false;
+    this.lazyInit = false;
   }
 
   i2cConnect() {
     this.firstByte = true;
+
+    if(!this.lazyInit){
+      this.lazyInit = true;
+
+      // update every ~ 30ms
+      this.arduino.getRunner().requestUIUpdate(() => {
+        this.update(this.arduino);
+      });
+    }
+
     return true;
   }
 
