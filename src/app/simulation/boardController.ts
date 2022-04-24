@@ -4,6 +4,7 @@ import {
   PushbuttonElement,
   PotentiometerElement,
   SlidePotentiometerElement,
+  ServoElement,
 } from '@wokwi/elements';
 
 import { ArduinoUno } from '../../devices/arduino/ArduinoUno';
@@ -12,6 +13,7 @@ import { AVRRunner } from '../../devices/arduino/ATmega328Runner';
 import { SSD1306Controller } from '../../devices/display/ssd1306';
 import { DigitalPinComponent, PinDir } from '../../devices/DigitalPinComponent';
 import { AnalogInputComponent } from '../../devices/AnalogInputComponent';
+import { Servo, ServoComponent } from '../../devices/ServoComponent';
 
 /**
  * Init drivers for componentes added to div.board
@@ -39,6 +41,10 @@ export class BoardController {
 
       if (ui instanceof SlidePotentiometerElement) {
         this.arduino.addComponent(new AnalogInputComponent(+ui.dataset.pin, ui));
+      }
+
+      if (ui instanceof ServoElement) {
+        this.arduino.addComponent(new ServoComponent(+ui.dataset.pin, ui));
       }
     });
   }
