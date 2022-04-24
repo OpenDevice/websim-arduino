@@ -29,6 +29,9 @@ export type CPUEvent = {
   eventCall : any
 }
 
+export type RenderEvent = (cpu: CPU) => void;
+
+
 // ATmega328p params
 const FLASH = 0x8000;
 
@@ -51,7 +54,7 @@ export class AVRRunner {
   readonly i2cBus: I2CBus  | null = null;
   readonly adc: AVRADC;
   readonly MHZ = 16e6; // 16 MHZ
-  readonly workUnitCycles = 500000;
+  readonly workUnitCycles = 500000; // 31ms (~32fps)
   readonly taskScheduler = new MicroTaskScheduler();
   private breakpoints:number[]
 
@@ -61,6 +64,8 @@ export class AVRRunner {
   //events
   private cpuEvents : CPUEvent[] = [];
   private cpuEventsMicrosecond : CPUEvent[] = [];
+  private renderEvents : RenderEvent[] = [];
+
   private callback: (cpu: CPU) => void;
 
 
@@ -183,8 +188,24 @@ export class AVRRunner {
     }
 
     callback(this.cpu); 
+
+    // Call render events...
+    if (this.renderEvents.length > 0) {
+      for (const event of this.renderEvents) {
+        event(this.cpu);
+      }
+    }
+
     this.taskScheduler.postTask(() => this.execute(callback));
     // requestAnimationFrame(() => this.execute(callback));
+  }
+
+  cpuNanos():number {
+    return Math.round((this.cpu.cycles / this.MHZ) * 1000000000);
+  }
+
+  cpuMillis():number {
+    return Math.round((this.cpu.cycles / this.MHZ) * 1000);
   }
 
   start(callback: (cpu: CPU) => void){
@@ -260,6 +281,15 @@ export class AVRRunner {
     const cpuEvent: CPUEvent = { period: period, eventCall: eventCall };
     this._addCPUEvent(cpuEvent);
   }
+
+
+  /**
+   * Request events to UI updates (~30fps)
+   */
+   requestUIUpdate(eventCall: any) {
+    this.renderEvents.push(eventCall);
+  }
+
 
   /**
    * Request CPUEvent on every X Microsecond

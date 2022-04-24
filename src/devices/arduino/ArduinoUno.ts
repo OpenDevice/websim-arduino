@@ -7,6 +7,9 @@ import { digital_pin_to_bit_mask } from "./internal/pinMapping";
 type callback = (n: string) => any;
 type simulationCallback = (cpu: CPU) => any;
 
+const MHZ = 16000000;
+const MHZ_MILLIS = MHZ / 1000000;
+
 export class ArduinoUno {
   private runner: AVRRunner | null = null;
   
@@ -18,8 +21,7 @@ export class ArduinoUno {
   public simulationTimeCallback: simulationCallback | null = null;
   public breakEventCallback: (cpu: CPU) => void;
 
-  public MHZ = 16000000;
-
+  public MHZ = MHZ;
 
   addCPUEvent(period: number, eventCall: any) {
     const cpuEvent: CPUEvent = { period: period, eventCall: eventCall };
@@ -34,11 +36,15 @@ export class ArduinoUno {
   }
 
   cpuNanos():number {
-    return Math.round((this.runner.cpu.cycles / this.runner.MHZ) * 1000000000);
+    return this.runner?.cpuNanos();
   }
 
   cpuMillis():number {
-    return Math.round((this.runner.cpu.cycles / this.runner.MHZ) * 1000);
+    return this.runner?.cpuMillis();
+  }
+
+  cyclesToMillis(cpuCycles: number){
+    return Math.trunc( ( cpuCycles / MHZ_MILLIS));
   }
 
   addComponent(comp:Component){
@@ -119,6 +125,14 @@ export class ArduinoUno {
     this.runner?.resume();
   }
 
+  /**
+   * Request events to UI updates (~30fps)
+   */
+  requestUIUpdate(eventCall: any) {
+    this.runner?.requestUIUpdate(eventCall);
+  }
+  
+
   isRunning(){
     if(!this.runner) return false;
     return this.runner.isRunning();
@@ -169,6 +183,25 @@ export class ArduinoUno {
     return false;
   }
 
+
+  onPinChange(pin: number, callback: (value :boolean) => void): void {
+
+    const port = this.digitalPinToPort(pin);
+    const bit = this.digitalPinToBitMask(pin);
+
+    port.addListener((value, old) => {
+
+      var state = value & (1 << bit)  ? true : false;
+      var oldState = old & (1 << bit) ? true : false;
+
+      if(state != oldState ){
+        callback(state);
+      }
+
+    });
+
+  }
+
   analogWrite(pin:number, analogValue: number){
       // Write analogValue to ADCH and ADCL
       //this.runner.cpu.data[0x78] = analogValue & 0xff;
@@ -182,5 +215,13 @@ export class ArduinoUno {
    setBreakpoints(breakpoints:string[]){
       this.runner.setBreakpoints(breakpoints);
    }
+
+   getRunner(){
+     return this.runner;
+   }
+}
+
+export function map(x:number, in_min:number, in_max:number, out_min:number, out_max:number) : number {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
