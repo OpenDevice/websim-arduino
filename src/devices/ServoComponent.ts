@@ -2,7 +2,6 @@ import { ServoElement } from '@wokwi/elements';
 import { ArduinoUno, map } from './arduino/ArduinoUno';
 import { AVRRunner } from './arduino/ATmega328Runner';
 import { Component } from './Component';
-import { update } from '../../../../../../Programacao/Arduino/Robots/openroberta-lab/OpenRobertaWeb/src/app/nepostackmachine/wedo.model';
 
 const MIN_SERVO_PWM = 554;
 const MAX_SERVO_PWM = 2400;
@@ -18,6 +17,7 @@ export class ServoComponent implements Component {
 
   constructor(private pin: number, private ui: ServoElement) {
     this.reset();
+    //this.update = debounce_leading(this, this.update);
   }
 
   init(arduino: ArduinoUno, runner: AVRRunner): void {
@@ -26,6 +26,7 @@ export class ServoComponent implements Component {
     arduino.onPinChange(this.pin, (pinState) => {
       this.updatePWM(pinState, runner.cpu.cycles);
     });
+
   }
 
   getAngle(): number {

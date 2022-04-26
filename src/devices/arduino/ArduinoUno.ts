@@ -150,8 +150,12 @@ export class ArduinoUno {
 
   }
 
-  digitalPinToBitMask(pin: number): number {
+  digitalPinToBit(pin: number): number {
     return digital_pin_to_bit_mask[pin];
+  }
+
+  digitalPinToBitMask(pin: number): number {
+    return (1 << digital_pin_to_bit_mask[pin]);
   }
 
   /**
@@ -187,18 +191,26 @@ export class ArduinoUno {
   onPinChange(pin: number, callback: (value :boolean) => void): void {
 
     const port = this.digitalPinToPort(pin);
-    const bit = this.digitalPinToBitMask(pin);
+    const bitMask = this.digitalPinToBitMask(pin);
 
     port.addListener((value, old) => {
 
-      var state = value & (1 << bit)  ? true : false;
-      var oldState = old & (1 << bit) ? true : false;
-
-      if(state != oldState ){
-        callback(state);
+      if((value & bitMask) !== (old & bitMask)){
+        callback(value & bitMask ? true : false);
       }
 
     });
+
+    // port.addListener((value, old) => {
+
+    //   var state = value & (1 << bit)  ? true : false;
+    //   var oldState = old & (1 << bit) ? true : false;
+
+    //   if(state != oldState ){
+    //     callback(state);
+    //   }
+
+    // });
 
   }
 
