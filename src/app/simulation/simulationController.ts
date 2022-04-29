@@ -40,7 +40,7 @@ export class SimulationController{
       if(window.gtag){ // google analitcs
         window.gtag('event', 'purchase');
       }
-      window.open("https://github.com/OpenDevice/websim-arduino-docs/wiki/Buy---Build");
+      window.open("https://forms.gle/jemzCashUA4J7fbP9");
     });
 
     const cpuPerf = new CPUPerformance(arduino.MHZ);
