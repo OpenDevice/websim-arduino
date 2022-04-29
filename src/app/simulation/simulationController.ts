@@ -32,9 +32,15 @@ export class SimulationController{
     const loadSavedButton = document.querySelector('#load-saved');
     loadSavedButton.addEventListener('click', loadSavedProgram);
 
-
     document.getElementById("btn-help").addEventListener('click', function(){
       window.open("https://github.com/OpenDevice/websim-arduino-docs/wiki");
+    });
+
+    document.getElementById("buy").addEventListener('click', function(){
+      if(window.gtag){ // google analitcs
+        window.gtag('event', 'purchase');
+      }
+      window.open("https://github.com/OpenDevice/websim-arduino-docs/wiki/Buy---Build");
     });
 
     const cpuPerf = new CPUPerformance(arduino.MHZ);

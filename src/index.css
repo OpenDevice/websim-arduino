@@ -65,9 +65,17 @@ body {
 
 #status-label {
   font-size: 14px;
-  color: #b9b5b5;
+  color: #e7ffeb;
   width: 172px; 
   text-align: center;
+}
+
+#buy {
+  border-radius: 10px;
+  background-color: #478f01;
+  color: #ccfbd4;
+  border: 1px solid #7adf8c;
+  cursor: pointer;
 }
 
 .compiler-output {
