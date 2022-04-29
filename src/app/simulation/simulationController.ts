@@ -43,6 +43,15 @@ export class SimulationController{
       window.open("https://forms.gle/jemzCashUA4J7fbP9");
     });
 
+    var boardDiv = document.getElementById("board");
+    
+    // Upload using DnD
+    boardDiv.addEventListener("drop", dropHandler);
+    boardDiv.addEventListener("dragover", dragOverHandler);
+
+    document.getElementById("flash-zone").addEventListener('click', onFlashClick);
+    document.getElementById("hexupload").addEventListener('change', onFlashUploadOnChange);
+  
     const cpuPerf = new CPUPerformance(arduino.MHZ);
 
     arduino.simulationTimeCallback = ((cpu) => {
@@ -208,6 +217,67 @@ export class SimulationController{
         arduino.stop(); // TODO reset !
         stopButton.setAttribute('disabled', '1');
       }
+
+      function onFlashClick(){
+         document.getElementById("hexupload").click();
+      }
+
+      function onFlashUploadOnChange(){
+         var input = this;
+         if (input.files){
+          flashFile(input.files[0]);
+         }
+      }
+
+      function flashFile(file:any){
+
+        if (file && file.name.indexOf("hex") !== -1 ) {
+          var reader = new FileReader();
+          reader.readAsText(file, "UTF-8");
+          reader.onload = function (evt) {
+            localStorage.setItem("lastProgram", evt.target.result.toString());
+            loadSavedProgram();
+          }
+          reader.onerror = function (evt) {
+            console.error(evt);
+            alert("Fail !");
+          }
+        }else{
+          alert("Invalid file (not a .hex file)");
+        }
+
+      }
+
+      /****** FLASH USING DRAG-N-DROP ******/
+
+      function dragOverHandler(ev:any) {
+        // Prevent default behavior (Prevent file from being opened)
+        ev.preventDefault();
+      }
+      
+      function dropHandler(ev:any) {
+        console.log('File(s) dropped');
+      
+        // Prevent default behavior (Prevent file from being opened)
+        ev.preventDefault();
+      
+        if (ev.dataTransfer.items) {
+          // Use DataTransferItemList interface to access the file(s)
+          for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+            // If dropped items aren't files, reject them
+            if (ev.dataTransfer.items[i].kind === 'file') {
+              var file = ev.dataTransfer.items[i].getAsFile();
+              flashFile(file);
+            }
+          }
+        } else {
+          // Use DataTransfer interface to access the file(s)
+          for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+            flashFile(ev.dataTransfer.files[i]);
+          }
+        }
+      }
+
     
       setTimeout(connectToIde, 1000);
 

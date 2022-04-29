@@ -78,6 +78,19 @@ body {
   cursor: pointer;
 }
 
+#flash-zone{ 
+  width: 194px;
+  height: 40px;
+  cursor: pointer;
+  /* background-color: #199ab1; */
+  /* opacity: 0; */
+}
+
+#flash-zone:hover{ 
+  background-color: #199ab1;
+  opacity: 0.5;
+}
+
 .compiler-output {
   /* height: 100vh; */
   background-color: red;
@@ -96,6 +109,20 @@ body {
   color: white;
 }
 
+.helper-disabled{
+  opacity: 0;
+  background-color: rgb(255, 121, 121);
+  cursor: not-allowed;
+}
+
+.helper-disabled:hover{
+  opacity: 0.5;
+}
+
+.helper-move{
+  cursor: move;
+  opacity: 0.5;
+}
 
 /****************** left sidebar **************** */
 
